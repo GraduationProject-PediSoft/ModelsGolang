@@ -54,12 +54,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetHistogram func(childComplexity int, file graphql.Upload) int
+		GetHistogram func(childComplexity int, file model.UploadFile) int
 	}
 }
 
 type QueryResolver interface {
-	GetHistogram(ctx context.Context, file graphql.Upload) (string, error)
+	GetHistogram(ctx context.Context, file model.UploadFile) (string, error)
 }
 
 type executableSchema struct {
@@ -119,7 +119,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetHistogram(childComplexity, args["file"].(graphql.Upload)), true
+		return e.complexity.Query.GetHistogram(childComplexity, args["file"].(model.UploadFile)), true
 
 	}
 	return 0, false
@@ -249,10 +249,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_getHistogram_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graphql.Upload
+	var arg0 model.UploadFile
 	if tmp, ok := rawArgs["file"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		arg0, err = ec.unmarshalNUploadFile2goᚑmicroserviceᚋgraphᚋmodelᚐUploadFile(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -489,7 +489,7 @@ func (ec *executionContext) _Query_getHistogram(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetHistogram(rctx, fc.Args["file"].(graphql.Upload))
+		return ec.resolvers.Query().GetHistogram(rctx, fc.Args["file"].(model.UploadFile))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2439,31 +2439,22 @@ func (ec *executionContext) unmarshalInputUploadFile(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "file"}
+	fieldsInOrder := [...]string{"image"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
+		case "image":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNInt2int(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
-		case "file":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("image"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.File = data
+			it.Image = data
 		}
 	}
 
@@ -2988,6 +2979,11 @@ func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋg
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUploadFile2goᚑmicroserviceᚋgraphᚋmodelᚐUploadFile(ctx context.Context, v interface{}) (model.UploadFile, error) {
+	res, err := ec.unmarshalInputUploadFile(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

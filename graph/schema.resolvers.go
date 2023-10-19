@@ -8,14 +8,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go-microservice/graph/model"
 	"io/ioutil"
 	"log"
-	"github.com/99designs/gqlgen/graphql"
 )
 
 // GetHistogram is the resolver for the getHistogram field.
-func (r *queryResolver) GetHistogram(ctx context.Context, file graphql.Upload) (string, error) {
-	fileContent, err := ioutil.ReadAll(file.File)
+func (r *queryResolver) GetHistogram(ctx context.Context, file model.UploadFile) (string, error) {
+	fileContent, err := ioutil.ReadAll(file.Image.File)
 
 	if err != nil {
 		log.Printf("Error al leer el contenido del archivo DICOM: %v", err)
