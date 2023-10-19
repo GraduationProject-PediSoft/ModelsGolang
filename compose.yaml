@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  go-server:
+    build: .
+    environment:
+      EUREKA_URL: ${EUREKA_URL}
+    networks:
+      - tesis
+
+networks:
+  tesis:
+    driver: bridge
+    external: true
