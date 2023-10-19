@@ -15,14 +15,14 @@ const defaultPort = "8001"
 
 func main() {
 	client := eureka.NewClient(&eureka.Config{
-		DefaultZone:           "http://127.0.0.1:8761/eureka/",
+		DefaultZone:           os.Getenv("EUREKA_URL"),
 		App:                   "go-microservice",
 		Port:                  8001,
 		RenewalIntervalInSecs: 10,
 		DurationInSecs:        30,
 		Metadata: map[string]interface{}{
 			"VERSION":              "0.1.0",
-			"MICROSERVICE-TYPE":    "IA-MODEL",
+			"microservice-type":    "IA-MODEL",
 		},
 	})
 	
