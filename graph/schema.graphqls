@@ -8,12 +8,16 @@ type File {
     contentType: String!
 }
 
+type JSON {
+    json: String!
+}
+
 input UploadFile {
     image: Upload!
 }
 
 "The `Query` type, represents all of the entry points into our object graph."
 type Query {
-    getHistogram(file: UploadFile!): String!
+    getHistogram(file: UploadFile!): JSON!
 }
 

@@ -14,27 +14,39 @@ import (
 )
 
 // GetHistogram is the resolver for the getHistogram field.
-func (r *queryResolver) GetHistogram(ctx context.Context, file model.UploadFile) (string, error) {
-	fileContent, err := ioutil.ReadAll(file.Image.File)
+func (r *queryResolver) GetHistogram(ctx context.Context, file model.UploadFile) (*model.JSON, error) {
+    fileContent, err := ioutil.ReadAll(file.Image.File)
 
-	if err != nil {
-		log.Printf("Error al leer el contenido del archivo DICOM: %v", err)
-		return "error", err
-	}
-	histogram := make(map[string]int)
-	for _, value := range fileContent {
-		if value >= 0 && value <= 255 {
-			key := fmt.Sprintf("%d", value)
-			histogram[key]++
-		}
-	}
-	histogramJSON, err := json.Marshal(histogram)
-	if err != nil {
-		log.Printf("Error al convertir el histograma a JSON: %v", err)
-		return "error", err
-	}
+    if err != nil {
+        log.Printf("Error al leer el contenido del archivo DICOM: %v", err)
+        errorResponse := model.JSON{
+            JSON: string("error"),
+        }
+        return &errorResponse, err
+    }
 
-	return string(histogramJSON), nil
+    histogram := make(map[string]int)
+    for _, value := range fileContent {
+        if value >= 0 && value <= 255 {
+            key := fmt.Sprintf("%d", value)
+            histogram[key]++
+        }
+    }
+    histogramJSON, err := json.Marshal(histogram)
+
+    if err != nil {
+        log.Printf("Error al convertir el histograma a JSON: %v", err)
+        errorResponse := model.JSON{
+            JSON: string("error"),
+        }
+        return &errorResponse, err
+    }
+
+    response := model.JSON{
+        JSON: string(histogramJSON),
+    }
+
+    return &response, nil
 }
 
 // Query returns QueryResolver implementation.

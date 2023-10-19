@@ -53,13 +53,17 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 	}
 
+	JSON struct {
+		JSON func(childComplexity int) int
+	}
+
 	Query struct {
 		GetHistogram func(childComplexity int, file model.UploadFile) int
 	}
 }
 
 type QueryResolver interface {
-	GetHistogram(ctx context.Context, file model.UploadFile) (string, error)
+	GetHistogram(ctx context.Context, file model.UploadFile) (*model.JSON, error)
 }
 
 type executableSchema struct {
@@ -108,6 +112,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.Name(childComplexity), true
+
+	case "JSON.json":
+		if e.complexity.JSON.JSON == nil {
+			break
+		}
+
+		return e.complexity.JSON.JSON(childComplexity), true
 
 	case "Query.getHistogram":
 		if e.complexity.Query.GetHistogram == nil {
@@ -475,6 +486,50 @@ func (ec *executionContext) fieldContext_File_contentType(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _JSON_json(ctx context.Context, field graphql.CollectedField, obj *model.JSON) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_JSON_json(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JSON, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_JSON_json(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JSON",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getHistogram(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getHistogram(ctx, field)
 	if err != nil {
@@ -501,9 +556,9 @@ func (ec *executionContext) _Query_getHistogram(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.JSON)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNJSON2ᚖgoᚑmicroserviceᚋgraphᚋmodelᚐJSON(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getHistogram(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -513,7 +568,11 @@ func (ec *executionContext) fieldContext_Query_getHistogram(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "json":
+				return ec.fieldContext_JSON_json(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JSON", field.Name)
 		},
 	}
 	defer func() {
@@ -2523,6 +2582,45 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var jSONImplementors = []string{"JSON"}
+
+func (ec *executionContext) _JSON(ctx context.Context, sel ast.SelectionSet, obj *model.JSON) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, jSONImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("JSON")
+		case "json":
+			out.Values[i] = ec._JSON_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2949,6 +3047,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNJSON2goᚑmicroserviceᚋgraphᚋmodelᚐJSON(ctx context.Context, sel ast.SelectionSet, v model.JSON) graphql.Marshaler {
+	return ec._JSON(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNJSON2ᚖgoᚑmicroserviceᚋgraphᚋmodelᚐJSON(ctx context.Context, sel ast.SelectionSet, v *model.JSON) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._JSON(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

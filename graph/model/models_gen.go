@@ -13,6 +13,10 @@ type File struct {
 	ContentType string `json:"contentType"`
 }
 
+type JSON struct {
+	JSON string `json:"json"`
+}
+
 type UploadFile struct {
 	Image graphql.Upload `json:"image"`
 }
